@@ -1,1 +1,1 @@
-# for monitor Stock market.
+# For monitor Stock market.
