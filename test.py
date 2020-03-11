@@ -110,6 +110,7 @@ class Stock():
         self.df = pd.DataFrame.from_dict(self.data,orient='index').astype(float)
         self.df.columns = [reg.sub("",i) for i in self.df.columns]
         self.df.index = pd.to_datetime(self.df.index)
+        self.df.sort_index(ascending=True,inplace=True)
 
     @staticmethod
     def cleanDict(d):
@@ -152,14 +153,23 @@ class Stock():
         self.parse_df()
         return self
 
-    def plot_series(self,toplot=['open','high','low','volume'],length=None,format='auto'):
+    def plot_series(self,toplot=['open','high','low','volume'],length=None,period=[],format='auto'):
         if format == 'auto':
             if self.mode == 'INTRADAY':
                 format= '%m/%d %H:%M'
             elif self.mode == 'DAILY':
                 format='%y/%m/%d'
+        df = self.df
+        if length:
+            df = df.iloc[0:length,:]
+        elif isinstance(period,str):
+            df = df[period:]
+        elif period:
+            df = df[period[0]:period[1]]
+        else:
+            df = df
 
-        df = self.df.iloc[0:length,:].sort_index(ascending=True)
+        df = df.sort_index(ascending=True)
         # df = df
         df.loc[:,f'Time Period {self.mode}'] = df.index.map(lambda x:x.strftime(format))
         fig,ax = plt.subplots()
@@ -167,10 +177,9 @@ class Stock():
         plt.tight_layout()
         return fig
 
-
     @property
     def currentValue(self):
-        return self.df.iloc[0,:].close * self.shares
+        return self.df.iloc[-1,:].close * self.shares
 
 class Portfolio():
     def __init__(self,stocks,mode='intraday'):
@@ -185,6 +194,21 @@ class Portfolio():
             for k,i in stocks.items():
                 self.stocks.append(Stock(k,i,mode=mode))
 
+    def __getitem__(self,i):
+        if isinstance(i,int):
+            return self.stocks[i]
+        elif isinstance(i,str):
+            for s in self.stocks:
+                if s.symbol == i:
+                    return s
+        elif isinstance(i,list):
+            res = []
+            for s in self.stocks:
+                if s.symbol == i:
+                    res.append(s)
+            return res
+        else:
+            return self.stocks[i]
 
     def save(self,):
         for s in self.stocks:
@@ -194,13 +218,13 @@ class Portfolio():
         for s in self.stocks:
             s.savetoDB()
 
-    def readDB(self,client):
+    def readDB(self,db):
         for s in self.stocks:
-            s.readDB(client)
+            s.readDB(db)
         return self
 
     def __repr__(self):
-        return "My Portfolio:\n"+"\n".join(str(i) for i in self.stocks)
+        return "Portfolio:\n"+"\n".join(str(i) for i in self.stocks)
 
     def get_series(self,**kwargs):
         pool = deque(self.stocks)
@@ -219,7 +243,7 @@ class Portfolio():
     def currentValue(self):
         return sum(i.currentValue for i in self.stocks)
 
-    def plot_series(self,target='all',toplot=['open','high','low'],length=None,format='auto'):
+    def plot_series(self,target='all',toplot=['open','high','low'],length=None,period=[],format='auto'):
         if format == 'auto':
             if self.mode == 'INTRADAY':
                 format= '%m/%d %H:%M'
@@ -238,8 +262,16 @@ class Portfolio():
         for i in dfs: index.union(i.index)
         dfs = [ i.reindex(index).fillna(method='bfill') for i in dfs]
         df = sum(dfs)
-        df = df.iloc[0:length,:].sort_index(ascending=True)
+        if length:
+            df = df.iloc[0:length,:]
+        elif isinstance(period,str):
+            df = df[period:]
+        elif period:
+            df = df[period[0]:period[1]]
+        else:
+            df = df
 
+        df = df.sort_index(ascending=True)
         df.loc[:,f'Time Period {self.mode}'] = df.index.map(lambda x:x.strftime(format))
 
         df.plot(x=f'Time Period {self.mode}',y=toplot,
@@ -263,39 +295,6 @@ def sync_stocks(stocks,client,days=0,mode='intraday',):
                 stock.savetoDB(client)
             print(f"Synced stock {s}.")
 
-a = Stock('MSFT')
-a.readDB(db)
-a.cleanDict({'a':1})
-f=a.plot_series()
-
-f.savefig('a.png')
-
-a.savetoDB(db)
-
-
-col = db['INTRADAY']
-res =  col.find_one({'metadata.Symbol': a.symbol},projection={'metadata':True,'_id':False})
-res
-a.metadata
-a._getRefreshDate(db)
-
-parse('2020-02-21 10:55:00')>a._getRefreshDate(db)
-
-
-
-
-col = db.INTRADAY
-a = col.find_one()
-a
-a = col.find_one({'metadata.Symbol':'MSFT'},projection={'_id':False})
-a.pop('metadata')
-for i in a:
-    parse(i)
-a
-a['_id']
-a['2020-02-21 10:55:00']
-
-a['metadata']
 
 
 if __name__=="__main__":
@@ -313,19 +312,22 @@ if __name__=="__main__":
         sp500_symbols = json.load(f)
     sync_stocks(sp500_symbols,client,mode='daily')
 
-#
-# my = {
-# "MSFT": 53,
-# "NVDA": 34,
-# "FB": 16,
-# "AMZN": 2,
-# "AMD": 2,
-# "SNAP": 33,
-# "ISEE": 3,
-# "STRO": 15,
-# }
-#
-# port = Portfolio(my)
-# port.readDB(client)
-#
-# port.plot_series(toplot=['open','close'],length=None)
+
+my = {
+"MSFT": 53,
+"NVDA": 34,
+"FB": 16,
+"AMZN": 2,
+"AMD": 2,
+"SNAP": 33,
+"ISEE": 3,
+"STRO": 15,
+}
+
+port = Portfolio(my)
+port
+port.readDB(db)
+
+
+
+port.plot_series(toplot=['open','close'],period='2020/02/28')
