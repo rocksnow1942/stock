@@ -269,12 +269,13 @@ class Portfolio():
             df = df[period[0]:period[1]]
         else:
             df = df
-
         df = df.sort_index(ascending=True)
         df.loc[:,f'Time Period {self.mode}'] = df.index.map(lambda x:x.strftime(format))
-
+        fig, ax = plt.subplots()
         df.plot(x=f'Time Period {self.mode}',y=toplot,
-                    secondary_y=['volume'],title="Portfolio",rot=40)
+                    secondary_y=['volume'],title="Portfolio",rot=40,ax=ax)
+        plt.tight_layout()
+        return fig
 
 
 
