@@ -7,7 +7,6 @@ import re
 import time
 from collections import deque
 import json
-import pymongo
 from pymongo import MongoClient
 import datetime
 # import pprint
@@ -310,24 +309,31 @@ if __name__=="__main__":
     }
     with open('SP500.json') as f:
         sp500_symbols = json.load(f)
-    sync_stocks(sp500_symbols,client,mode='daily')
-
-
-my = {
-"MSFT": 53,
-"NVDA": 34,
-"FB": 16,
-"AMZN": 2,
-"AMD": 2,
-"SNAP": 33,
-"ISEE": 3,
-"STRO": 15,
-}
-
-port = Portfolio(my)
-port
-port.readDB(db)
+    sync_stocks(sp500_symbols,db,days=3,mode='daily')
 
 
 
-port.plot_series(toplot=['open','close'],period='2020/02/28')
+#
+# my = {
+# "MSFT": 53,
+# "NVDA": 34,
+# "FB": 16,
+# "AMZN": 2,
+# "AMD": 2,
+# "SNAP": 33,
+# "ISEE": 3,
+# "STRO": 15,
+# }
+#
+# port = Portfolio(my)
+# port
+# port.readDB(db)
+#
+#
+#
+# port.plot_series(toplot=['open','close'],period='2020/02/28')
+
+
+s = Stock('ACE','intraday')
+
+s.readDB(db)
