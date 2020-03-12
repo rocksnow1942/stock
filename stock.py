@@ -9,12 +9,10 @@ from collections import deque
 import json
 from pymongo import MongoClient
 import datetime
-# import pprint
 from dateutil.parser import parse
 from mymodule import mprint
 
 mprint.printToScreen = True
-
 
 """
 API from:
