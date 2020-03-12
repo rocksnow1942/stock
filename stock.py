@@ -28,10 +28,10 @@ apikey = os.environ.get('key1')
 
 class DataBase():
     _OLDTIME = datetime.datetime(1000,1,1)
-    def __init__(self):
-        client = MongoClient('localhost',27017)
-        db = client.STOCK
-        self.db = db
+
+    def __init__(self, address='localhost', port=27017,database='STOCK'):
+        client = MongoClient(address,port)
+        self.db = client[database]
 
     def __getitem__(self,i):
         return self.db[i]
