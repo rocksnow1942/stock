@@ -5,7 +5,7 @@ import datetime
 #
 
 
-db = DataBase(address='192.168.86.33',port=27017)
+db = DataBase(address='hui-razer.lan',port=27017)
 
 
 db.listAllStock('DAILY')
