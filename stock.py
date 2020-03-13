@@ -10,7 +10,28 @@ import json
 from pymongo import MongoClient
 import datetime
 from dateutil.parser import parse
-from mymodule import mprint
+# from mymodule import mprint
+
+class MyPrint:
+    """
+    use mprint the same way as print().
+    Set printToScreen = False to disable print.
+    Set mprint.callback to provide a callabck(msg) function when printToScreen is disabled.
+    by default, call back is void().
+    """
+    printToScreen = True
+
+
+    def callback(self,msg):
+        return
+
+    def __call__(self,msg):
+        if self.printToScreen:
+            print(msg)
+        else:
+            self.callback(msg)
+
+mprint = MyPrint()
 
 mprint.printToScreen = True
 
