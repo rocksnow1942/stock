@@ -34,6 +34,13 @@ class DataBase():
     def __getitem__(self,i):
         return self.db[i]
 
+    def copyFrom(self,db):
+        cols = db.list_collection_names()
+        for col in cols:
+            data = db[col].find({})
+            self.db[col].insert_many(data)
+        return self
+
     def read(self,symbol,mode):
         """
         return data of a symbol in dictionary, it is almost the same as returned from API.
