@@ -4,9 +4,10 @@ import json
 import datetime
 #
 
-
+mydb = DataBase()
 db = DataBase(address='hui-razer.lan',port=27017)
 
+db.copyFrom(mydb)
 
 db.listAllStock('DAILY')
 
