@@ -34,8 +34,8 @@ class DataBase():
     def __getitem__(self,i):
         return self.db[i]
 
-    def copy From(self,db):
-        cols = db.list_collection_names() 
+    def copyFrom(self,db):
+        cols = db.list_collection_names()
         for col in cols:
             data = db[col].find({})
             self.db[col].insert_many(data)
