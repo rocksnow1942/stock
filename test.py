@@ -3,6 +3,13 @@ import pandas as pd
 import json
 import datetime
 #
+
+
+db = DataBase(address='192.168.86.33',port=27017)
+
+
+db.listAllStock('DAILY')
+
 db = DataBase()
 #
 
