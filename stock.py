@@ -458,15 +458,20 @@ def switchapikey():
     global apikey
     apikey = os.environ.get('key2')
 
-def main(d=0,id=0):
+def main(d=0,id=0,db=0):
     """
     -d [int]: days threhold to synchronize daily data.
     default: 0
     -id [int]:days threhold to synchronize intraday data.
+    -db [int]: which database to use.
+    default 0 for development, use 1 for razer.
     """
     d = int(d)
     id = int(id)
-    db = DataBase()
+    if int(db) == 1:
+        db = DataBase(address='hui-razer.lan',port=27017)
+    else:
+        db = DataBase()
     print("+"*15+'Syncing DAILY data.'+'+'*15+'\n')
     symbols = db.listAllStock('DAILY')
     sync_stocks(symbols,db,days=d,mode='Daily')
